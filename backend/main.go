@@ -1,35 +1,44 @@
 package main
 
 import (
-    "log"
-    "net/http"
-    "series-tracker/api"
-    "github.com/gorilla/mux"
-    "github.com/rs/cors"
+	"series-tracker-backend/database"
+	"series-tracker-backend/handlers"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+
+	_ "series-tracker-backend/docs"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
-	
-    // Crear router
-    router := mux.NewRouter()
+	database.InitDB()
 
-    // Configurar rutas
-    api.SetupRoutes(router)
+	r := gin.Default()
 
-    // Servir archivos estáticos del frontend
-    fs := http.FileServer(http.Dir("./frontend"))
-    router.PathPrefix("/").Handler(fs)
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-    // Configurar CORS
-    c := cors.New(cors.Options{
-        AllowedOrigins: []string{"*"},
-        AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
-        AllowedHeaders: []string{"Content-Type"},
-    })
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"http://localhost"}, 
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "PATCH"},                
+		AllowHeaders: []string{"*"},               
+	}))
 
-    handler := c.Handler(router)
+	apiRoutes := r.Group("/api")
+	{
+		apiRoutes.GET("/series", handlers.GetSeries)        
+		apiRoutes.GET("/series/:id", handlers.GetSerieByID)   
+		apiRoutes.POST("/series", handlers.CreateSerie)       
+		apiRoutes.PUT("/series/:id", handlers.UpdateSerie)   
+		apiRoutes.DELETE("/series/:id", handlers.DeleteSerie)
 
-    // Iniciar servidor
-    log.Println("Servidor iniciado en el puerto 8080")
-    log.Fatal(http.ListenAndServe(":8080", handler))
+		apiRoutes.PATCH("/series/:id/status", handlers.UpdateStatus)      
+		apiRoutes.PATCH("/series/:id/episode", handlers.IncrementEpisode) 
+		apiRoutes.PATCH("/series/:id/upvote", handlers.Upvote)           
+		apiRoutes.PATCH("/series/:id/downvote", handlers.Downvote)        
+	}
+
+	r.Run(":8080")
 }
