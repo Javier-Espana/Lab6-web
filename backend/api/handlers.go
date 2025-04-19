@@ -14,6 +14,13 @@ var (
     mutex      = &sync.Mutex{} // Para manejar concurrencia
 )
 
+
+// @Summary Get all series
+// @Description Retrieve the list of all series
+// @Tags series
+// @Produce json
+// @Success 200 {array} Series
+// @Router /api/series [get]
 func GetSeries(w http.ResponseWriter, r *http.Request) {
     mutex.Lock()
     defer mutex.Unlock()

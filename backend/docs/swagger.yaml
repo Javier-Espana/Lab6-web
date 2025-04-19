@@ -1,0 +1,35 @@
+definitions:
+  api.Series:
+    properties:
+      id:
+        type: integer
+      lastEpisodeWatched:
+        type: integer
+      ranking:
+        type: integer
+      status:
+        type: string
+      title:
+        type: string
+      totalEpisodes:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /api/series:
+    get:
+      description: Retrieve the list of all series
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.Series'
+            type: array
+      summary: Get all series
+      tags:
+      - series
+swagger: "2.0"
