@@ -27,9 +27,7 @@ Este proyecto es una aplicación web para gestionar series, permitiendo a los us
    ```
 
 
-```markdown
-![Vista de la aplicación](screenshot.png)
-```
+![Captura de pantalla](captura.png)
 
 ## Notas adicionales
 
