@@ -21,23 +21,26 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost"}, 
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "PATCH"},                
-		AllowHeaders: []string{"*"},               
+		AllowOrigins: []string{"http://localhost"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
+		AllowHeaders: []string{"*"},
 	}))
+
+	r.StaticFile("/", "./frontend/index.html") // Serve the frontend index.html for the root path
+	r.Static("/static", "./frontend/static")   // Serve static files like images, CSS, etc.
 
 	apiRoutes := r.Group("/api")
 	{
-		apiRoutes.GET("/series", handlers.GetSeries)        
-		apiRoutes.GET("/series/:id", handlers.GetSerieByID)   
-		apiRoutes.POST("/series", handlers.CreateSerie)       
-		apiRoutes.PUT("/series/:id", handlers.UpdateSerie)   
+		apiRoutes.GET("/series", handlers.GetSeries)
+		apiRoutes.GET("/series/:id", handlers.GetSerieByID)
+		apiRoutes.POST("/series", handlers.CreateSerie)
+		apiRoutes.PUT("/series/:id", handlers.UpdateSerie)
 		apiRoutes.DELETE("/series/:id", handlers.DeleteSerie)
 
-		apiRoutes.PATCH("/series/:id/status", handlers.UpdateStatus)      
-		apiRoutes.PATCH("/series/:id/episode", handlers.IncrementEpisode) 
-		apiRoutes.PATCH("/series/:id/upvote", handlers.Upvote)           
-		apiRoutes.PATCH("/series/:id/downvote", handlers.Downvote)        
+		apiRoutes.PATCH("/series/:id/status", handlers.UpdateStatus)
+		apiRoutes.PATCH("/series/:id/episode", handlers.IncrementEpisode)
+		apiRoutes.PATCH("/series/:id/upvote", handlers.Upvote)
+		apiRoutes.PATCH("/series/:id/downvote", handlers.Downvote)
 	}
 
 	r.Run(":8080")
