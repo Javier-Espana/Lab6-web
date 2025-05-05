@@ -1,0 +1,51 @@
+# Documentación del uso de la API
+
+## Endpoints disponibles
+
+### 1. Obtener todas las series
+**Endpoint:** `GET /api/series`
+
+- **Descripción:** Devuelve una lista de todas las series con soporte para filtros y ordenamiento.
+- **Respuesta:**
+  - Código 200: Lista de series obtenida con éxito.
+
+### 2. Crear una nueva serie
+**Endpoint:** `POST /api/series`
+
+- **Descripción:** Permite crear una nueva serie en la base de datos.
+- **Cuerpo de la solicitud:**
+  ```json
+  {
+    "title": "string",
+    "description": "string",
+    "status": "string"
+  }
+  ```
+- **Respuesta:**
+  - Código 201: Serie creada con éxito.
+
+### 3. Obtener una serie por ID
+**Endpoint:** `GET /api/series/{id}`
+
+- **Descripción:** Devuelve los detalles de una serie específica por su ID.
+- **Parámetros:**
+  - `id` (path): ID de la serie.
+- **Respuesta:**
+  - Código 200: Detalles de la serie obtenidos con éxito.
+  - Código 404: Serie no encontrada.
+
+### 4. Actualizar el estado de una serie
+**Endpoint:** `PATCH /api/series/{id}/status`
+
+- **Descripción:** Permite actualizar el estado de una serie específica.
+- **Parámetros:**
+  - `id` (path): ID de la serie.
+- **Cuerpo de la solicitud:**
+  ```json
+  {
+    "status": "string"
+  }
+  ```
+- **Respuesta:**
+  - Código 200: Estado de la serie actualizado con éxito.
+  - Código 404: Serie no encontrada.

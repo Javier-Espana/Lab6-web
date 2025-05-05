@@ -1,4 +1,68 @@
-info:
-  contact: {}
-paths: {}
 swagger: "2.0"
+info:
+  title: "Series API"
+  description: "API para gestionar series, incluyendo creación, obtención, actualización y eliminación."
+  version: "1.0.0"
+paths:
+  /api/series:
+    get:
+      summary: "Obtener todas las series"
+      description: "Devuelve una lista de todas las series con soporte para filtros y ordenamiento."
+      responses:
+        200:
+          description: "Lista de series obtenida con éxito."
+    post:
+      summary: "Crear una nueva serie"
+      description: "Permite crear una nueva serie en la base de datos."
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              title:
+                type: "string"
+              description:
+                type: "string"
+              status:
+                type: "string"
+      responses:
+        201:
+          description: "Serie creada con éxito."
+  /api/series/{id}:
+    get:
+      summary: "Obtener una serie por ID"
+      description: "Devuelve los detalles de una serie específica por su ID."
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "Detalles de la serie obtenidos con éxito."
+        404:
+          description: "Serie no encontrada."
+  /api/series/{id}/status:
+    patch:
+      summary: "Actualizar el estado de una serie"
+      description: "Permite actualizar el estado de una serie específica."
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "string"
+      responses:
+        200:
+          description: "Estado de la serie actualizado con éxito."
+        404:
+          description: "Serie no encontrada."

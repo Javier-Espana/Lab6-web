@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: seriesdb
     volumes:
-      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/ddl.sql:/docker-entrypoint-initdb.d/ddl.sql
     ports:
       - "5432:5432"
     healthcheck:
@@ -17,7 +17,6 @@ services:
 
   backend:
     build: ./backend
-    image: lab6-web-backend
     ports:
       - "8080:8080"
     environment:
@@ -29,17 +28,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/swagger/"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   frontend:
-    build: ./frontend
-    image: lab6-web-frontend
+    image: nginx:alpine
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+      - ./frontend/static:/usr/share/nginx/html/static
     ports:
       - "80:80"
     depends_on:
       backend:
-        condition: service_healthy
+        condition: service_started
