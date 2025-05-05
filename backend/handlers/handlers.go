@@ -1,39 +1,29 @@
 package handlers
 
 import (
-	"series-tracker-backend/models"
 	"series-tracker-backend/database"
+	"series-tracker-backend/models"
 
-    "github.com/gin-gonic/gin"
-    "gorm.io/gorm"
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-// @Summary Obtener todas las series
-// @Description Retorna una lista de series con filtros opcionales
-// @Produce json
-// @Param search query string false "Buscar por título"
-// @Param status query string false "Filtrar por estado"
-// @Param sort query string false "Ordenar por ranking (asc/desc)"
-// @Success 200 {array} models.Serie
-// @Router /api/series [get]
-
+// Función para actualizar una serie existente en la base de datos
+// Recibe el ID de la serie como parámetro y los datos actualizados en el cuerpo de la solicitud
 func UpdateSerie(c *gin.Context) {
 	id := c.Param("id")
 	var serie models.Serie
 
-	// Buscar la serie existente
 	if err := database.DB.First(&serie, id).Error; err != nil {
 		c.JSON(404, gin.H{"error": "Serie no encontrada"})
 		return
 	}
 
-	// Vincular datos JSON
 	if err := c.ShouldBindJSON(&serie); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Guardar cambios
 	if err := database.DB.Save(&serie).Error; err != nil {
 		c.JSON(500, gin.H{"error": "Error al actualizar la serie"})
 		return
@@ -42,11 +32,11 @@ func UpdateSerie(c *gin.Context) {
 	c.JSON(200, serie)
 }
 
+// Función para obtener una lista de series con filtros opcionales (estado, búsqueda y orden)
 func GetSeries(c *gin.Context) {
 	var series []models.Serie
 	db := database.DB
 
-	// Filtros
 	status := c.Query("status")
 	search := c.Query("search")
 
@@ -58,7 +48,6 @@ func GetSeries(c *gin.Context) {
 		db = db.Where("title ILIKE ?", "%"+search+"%")
 	}
 
-	// Ordenamiento
 	sortOrder := c.Query("sort")
 	if sortOrder == "asc" {
 		db = db.Order("ranking asc")
@@ -74,22 +63,21 @@ func GetSeries(c *gin.Context) {
 	c.JSON(200, series)
 }
 
+// Función para crear una nueva serie en la base de datos
+// Valida que el campo 'title' sea obligatorio
 func CreateSerie(c *gin.Context) {
 	var newSerie models.Serie
 
-	// Validar el JSON recibido
 	if err := c.ShouldBindJSON(&newSerie); err != nil {
 		c.JSON(400, gin.H{"error": "Datos inválidos: " + err.Error()})
 		return
 	}
 
-	// Validar campos requeridos
 	if newSerie.Title == "" {
 		c.JSON(400, gin.H{"error": "El campo 'title' es obligatorio"})
 		return
 	}
 
-	// Crear la serie en la base de datos
 	result := database.DB.Create(&newSerie)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "Error al crear la serie: " + result.Error.Error()})
@@ -99,26 +87,24 @@ func CreateSerie(c *gin.Context) {
 	c.JSON(201, newSerie)
 }
 
+// Función para incrementar el número de episodios vistos de una serie
+// Valida que no se exceda el total de episodios disponibles
 func IncrementEpisode(c *gin.Context) {
 	id := c.Param("id")
 	var serie models.Serie
 
-	// Buscar la serie
 	if err := database.DB.First(&serie, id).Error; err != nil {
 		c.JSON(404, gin.H{"error": "Serie no encontrada"})
 		return
 	}
 
-	// Validar episodio máximo
 	if serie.LastEpisodeWatched >= serie.TotalEpisodes {
 		c.JSON(400, gin.H{"error": "Ya has visto todos los episodios"})
 		return
 	}
 
-	// Incrementar episodio
 	serie.LastEpisodeWatched++
 
-	// Guardar cambios
 	if err := database.DB.Save(&serie).Error; err != nil {
 		c.JSON(500, gin.H{"error": "Error al actualizar el episodio: " + err.Error()})
 		return
@@ -127,7 +113,7 @@ func IncrementEpisode(c *gin.Context) {
 	c.JSON(200, serie)
 }
 
-// Handler: Obtener serie por ID
+// Función para obtener una serie específica por su ID
 func GetSerieByID(c *gin.Context) {
 	id := c.Param("id")
 	var serie models.Serie
@@ -141,6 +127,7 @@ func GetSerieByID(c *gin.Context) {
 	c.JSON(200, serie)
 }
 
+// Función para eliminar una serie de la base de datos por su ID
 func DeleteSerie(c *gin.Context) {
 	id := c.Param("id")
 	result := database.DB.Delete(&models.Serie{}, id)
@@ -158,6 +145,8 @@ func DeleteSerie(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "Serie eliminada correctamente"})
 }
 
+// Función para actualizar el estado de una serie
+// Recibe el nuevo estado en el cuerpo de la solicitud
 func UpdateStatus(c *gin.Context) {
 	id := c.Param("id")
 	var request struct {
@@ -186,6 +175,7 @@ func UpdateStatus(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "Estado actualizado correctamente"})
 }
 
+// Función para incrementar el ranking de una serie (upvote)
 func Upvote(c *gin.Context) {
 	id := c.Param("id")
 	result := database.DB.Model(&models.Serie{}).
@@ -195,6 +185,7 @@ func Upvote(c *gin.Context) {
 	handleVoteResult(c, result)
 }
 
+// Función para decrementar el ranking de una serie (downvote)
 func Downvote(c *gin.Context) {
 	id := c.Param("id")
 	result := database.DB.Model(&models.Serie{}).
@@ -204,7 +195,7 @@ func Downvote(c *gin.Context) {
 	handleVoteResult(c, result)
 }
 
-// Función auxiliar para manejar resultados de votación
+// Función auxiliar para manejar el resultado de las operaciones de votación (upvote/downvote)
 func handleVoteResult(c *gin.Context, result *gorm.DB) {
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "Error al actualizar el ranking"})

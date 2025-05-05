@@ -7,20 +7,20 @@ import (
 	"gorm.io/gorm"
 )
 
-// DB is the global database connection
+// DB es la conexión global a la base de datos
 var DB *gorm.DB
 
-// InitDB initializes the database connection
+// InitDB inicializa la conexión a la base de datos
 func InitDB() {
-	// Use hardcoded database connection details from docker-compose.yml
+	// Usa los detalles de conexión a la base de datos definidos en docker-compose.yml
 	dsn := "host=db user=user password=password dbname=seriesdb port=5432 sslmode=disable"
 
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("Failed to connect to the database: " + err.Error())
+		panic("Error al conectar con la base de datos: " + err.Error())
 	}
 
-	// Auto-migrate the database schema
+	// Realiza la migración automática del esquema de la base de datos
 	DB.AutoMigrate(&models.Serie{})
 }
