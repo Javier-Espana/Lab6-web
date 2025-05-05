@@ -26,6 +26,7 @@ Este proyecto es una aplicación web para gestionar series, permitiendo a los us
    http://localhost:8080/swagger/index.html
    ```
 
+## Captura de pantalla
 
 ![Captura de pantalla](captura.png)
 
